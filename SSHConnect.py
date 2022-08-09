@@ -1,4 +1,8 @@
 import paramiko
+import uuid
+import os
+import shutil
+
 
 class SSHConnection:
     '''
@@ -13,34 +17,59 @@ class SSHConnection:
         self.ssh = paramiko.SSHClient()
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh.connect(host_ip, host_port, user_name, password)
-
     '''
-    执行ssh命令
+    执行sh命令
     '''
-    def execute_command(self,command):
+    def execute_command(self, command):
         test = self.host_ip
         stdin, stdout, stderr = self.ssh.exec_command(command)
         out = stdout.readlines()
         err = stderr.readlines()
-        #关闭连接
+        # 关闭连接
         self.ssh.close()
-        return out,err
+        return out, err
 
     '''
     执行shell脚本
+    参数1：脚本名称 test.sh
     '''
-    def execute_shell(self,shellAbsolutePath):
+    def execute_shell(self, shellName):
+        # 当前文件的绝对路径
+        BASE_DIR = os.path.dirname(__file__)
+        shellAbsolutePath = BASE_DIR + "/shell/" + shellName
+        if not os.path.exists(shellAbsolutePath):
+            print("error,file not exists!")
+            return None
+        # 把shell脚本上传至指定目录
+        tempDir = BASE_DIR + "/shell/temp/"
+        tempFileName = str(uuid.uuid4()) + ".sh"
+        newFilePath = tempDir + tempFileName
+        # 存在就删除，复制shell为新的temp文件，用完再删除
+        if os.path.exists(newFilePath):
+            os.remove(newFilePath)
+        # 复制
+        shutil.copy(shellAbsolutePath, tempDir)
+        # 重命名
+        os.rename(tempDir + shellName, newFilePath)
+        # tempShell上传至服务器
         connection = self.ssh
         ftp = connection.open_sftp()
-        # 把shell脚本上传至指定目录
-        pass
+        linuxPath = "/tmp/" + tempFileName
+        ftp.put(newFilePath, linuxPath)
+        ftp.close()
+        # 删除临时文件
+        os.remove(newFilePath)
+        # 执行shell脚本
+        out, error = self.execute_command("chmod +x " + linuxPath + ";sh " + linuxPath + ";")
+        for o in out:
+            print(o.replace("\n",""))
+
+        # TODO 执行完删除linux上的临时shell 目前执行删除会报错，待解决
+        # self.execute_command("sudo rm -rf /tmp/*.sh;")
+        return out,error
 
 
-
-'''
-测试连接执行
+# 测试连接执行
 connection = SSHConnection(host_ip='192.168.1.230', user_name='root', password='bigdata123', host_port='22')
-out,error = connection.execute_command("ifconfig;")
-print(out)
-print(error)
-'''
+connection.execute_shell("test.sh")
+

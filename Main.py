@@ -1,13 +1,15 @@
-from flask import Flask,render_template
-app=Flask(__name__)
+from StruceHadoop import hadoopStruction
 
-@app.route('/index')
-def index():
-    return "this is index"
+print("#####################################")
+print("##         ClouderaManager         ##")
+print("#####################################")
 
-
-@app.route('/test')
-def test():
-    return render_template("index.html")
-
-app.run(port=8080)
+print("1 Hadoop")
+print("2 Flink")
+print("3 Spark")
+print("4 Redis")
+str = input("请选择要构建的服务:")
+if(str == "1"):
+    hadoopStruction().struct()
+else:
+    print("暂不支持此服务！")
