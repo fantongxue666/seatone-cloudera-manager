@@ -22,12 +22,20 @@ class SSHConnection:
     '''
     def execute_command(self, command):
         test = self.host_ip
-        stdin, stdout, stderr = self.ssh.exec_command(command)
-        out = stdout.readlines()
-        err = stderr.readlines()
+        stdin, stdout, stderr = self.ssh.exec_command(command,get_pty=True)
+        # out = stdout.readlines()
+        # err = stderr.readlines()
+        while not stdout.channel.exit_status_ready():
+            result = stdout.readline()
+            print(result.replace("\n",""))
+            # 由于在退出时，stdout还是会有一次输出，因此需要单独处理，处理完之后，就可以跳出了
+            if stdout.channel.exit_status_ready():
+                a = stdout.readlines()
+                print(a.replace("\n",""))
+                break
         # 关闭连接
         self.ssh.close()
-        return out, err
+        # return out, err
 
     '''
     执行shell脚本
@@ -60,7 +68,7 @@ class SSHConnection:
         # 删除临时文件
         os.remove(newFilePath)
         # 执行shell脚本
-        out, error = self.execute_command("chmod +x " + linuxPath + ";sh " + linuxPath + ";")
+        out, error = self.execute_command("chmod +x " + linuxPath + ";source " + linuxPath + ";")
         for o in out:
             print(o.replace("\n",""))
 
@@ -68,8 +76,4 @@ class SSHConnection:
         # self.execute_command("sudo rm -rf /tmp/*.sh;")
         return out,error
 
-
-# 测试连接执行
-connection = SSHConnection(host_ip='192.168.1.230', user_name='root', password='bigdata123', host_port='22')
-connection.execute_shell("test.sh")
 
