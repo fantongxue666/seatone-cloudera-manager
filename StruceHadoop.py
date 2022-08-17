@@ -18,6 +18,9 @@ class hadoopStruction:
                 print("ERROR! 无法与目标服务器建立连接！")
         elif(param == "cluster"):
             print("开始构建hadoop集群版!")
+
+
+
         else:
             print("暂不支持！")
         print("搭建完成！去看效果吧！")

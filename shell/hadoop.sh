@@ -33,11 +33,11 @@ if [ $? -ne 0 ];then
 	test_result=$(java -version)
 	if [ $? -eq 0 ];then
 		echo "jdk安装成功！"
+		rm -rf /tmp/jdk-8u151-linux-x64.rpm
 	else
 		echo "ERROR！jdk安装失败！"
 		exit
 	fi
-	rm -rf /tmp/jdk-8u151-linux-x64.rpm
 else
 	echo "存在JDK环境!"
 fi
@@ -66,16 +66,26 @@ if [ $? -ne 0 ];then
 	sed -i '$aexport YARN_RESOURCEMANAGER_USER=root' /etc/profile
 	sed -i '$aexport YARN_NODEMANAGER_USER=root' /etc/profile
         source /etc/profile
-	sed -i '$aexport JAVA_HOME=$JAVA_HOME' /opt/module/hadoop-3.2.3/etc/hadoop/hadoop-env.sh
+	sed -i '$aexport JAVA_HOME=/usr/java/jdk1.8.0_151' /opt/module/hadoop-3.2.3/etc/hadoop/hadoop-env.sh
         test_result=$(hadoop version)
         if [ $? -eq 0 ];then
         	echo "Hadoop安装成功！"
-		rm -rf /tmp/hadoop-3.2.3.tar.gz
+		#rm -rf /tmp/hadoop-3.2.3.tar.gz
         else
         	echo "ERROR！Hadoop安装失败！"
         	exit
         fi
 fi
+export JAVA_HOME=/usr/java/jdk1.8.0_151
+export HADOOP_HOME=/opt/module/hadoop-3.2.3
+export PATH=$HADOOP_HOME/bin:$PATH
+export PATH=$HADOOP_HOME/sbin:$PATH
+export HDFS_NAMENODE_USER=root
+export HDFS_DATANODE_USER=root
+export HDFS_SECONDARYNAMENODE_USER=root
+export YARN_RESOURCEMANAGER_USER=root
+export YARN_NODEMANAGER_USER=root
+
 echo "关闭防火墙..."
 `systemctl stop firewalld`
 echo "自动配置hadoop的自定义配置..."
@@ -109,11 +119,12 @@ else
 fi
 
 echo "开始启动hadoop各项服务..."
-`sh /opt/module/hadoop-3.2.3/sbin/start-all.sh`
+/opt/module/hadoop-3.2.3/sbin/start-all.sh
 echo "hdfs初始化..."
-`hdfs namenode -format`
+hdfs namenode -format
 echo "======================================================"
 echo "Web 端查看 HDFS 的 NameNode：http://0.0.0.0:9870"
 echo "Web 端查看 YARN 的 ResourceManager：http://0.0.0.0:8088"
 echo "======================================================"
+
 
