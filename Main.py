@@ -30,7 +30,14 @@ def handle():
             finally:pass
         elif(str == "2"):
             #集群
-            pass
+            ips = input("请输入集群服务器的IP列表（多个逗号隔开）：")
+            try:
+                ip_list = ips.split(",")
+            except Exception:
+                print("ERROR! 非法字符！")
+            for temp_ip in ip_list:
+                pass
+
         else:
             print("暂不支持！")
     else:
