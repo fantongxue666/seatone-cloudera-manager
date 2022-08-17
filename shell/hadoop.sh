@@ -16,7 +16,8 @@ if [ $? -ne 0 ];then
 	`yum install -y expect`
 fi
 echo "检查是否存在JDK环境..."
-if [ -z $JAVA_HOME ];then
+java -version
+if [ $? -ne 0 ];then
         echo "不存在JDK环境，删除openssh自带的JDK..."
         for every in `rpm -qa | grep jdk`
         do
@@ -41,7 +42,8 @@ else
 	echo "存在JDK环境!"
 fi
 echo "检查是否存在hadoop环境..."
-if [ -z $HADOOP_HOME ];then
+hadoop version
+if [ $? -ne 0 ];then
 	echo "不存在hadoop环境，下载hadoop安装包..."
 	cd /tmp && wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.2.3/hadoop-3.2.3.tar.gz
 	if [ ! -d /opt/module ];then
