@@ -17,8 +17,8 @@ if [ $? -ne 0 ];then
 fi
 echo "检查是否存在JDK环境..."
 java -version
-if [ $? -ne 0 ];then
-        echo "不存在JDK环境，删除openssh自带的JDK..."
+if [ $? -ne 0 ] || [ -z "$(echo $JAVA_HOME)" ];then
+        echo "删除openssh自带的JDK..."
         for every in `rpm -qa | grep jdk`
         do
                 rpm -e --nodeps $every
@@ -56,6 +56,7 @@ if [ $? -ne 0 ];then
 		echo "ERROR！解压失败！"
 		exit
 	fi
+	JAVA_HOME=$(echo $JAVA_HOME)
 	echo "配置hadoop环境变量..."
         sed -i '$aexport HADOOP_HOME=/opt/module/hadoop-3.2.3' /etc/profile
         sed -i '$aexport PATH=$HADOOP_HOME/bin:$PATH' /etc/profile
@@ -66,7 +67,7 @@ if [ $? -ne 0 ];then
 	sed -i '$aexport YARN_RESOURCEMANAGER_USER=root' /etc/profile
 	sed -i '$aexport YARN_NODEMANAGER_USER=root' /etc/profile
         source /etc/profile
-	sed -i '$aexport JAVA_HOME=/usr/java/jdk1.8.0_151' /opt/module/hadoop-3.2.3/etc/hadoop/hadoop-env.sh
+	eval sed -i '$aexport JAVA_HOME=${JAVA_HOME}' /opt/module/hadoop-3.2.3/etc/hadoop/hadoop-env.sh
         test_result=$(hadoop version)
         if [ $? -eq 0 ];then
         	echo "Hadoop安装成功！"
@@ -76,7 +77,7 @@ if [ $? -ne 0 ];then
         	exit
         fi
 fi
-export JAVA_HOME=/usr/java/jdk1.8.0_151
+export JAVA_HOME=$JAVA_HOME
 export HADOOP_HOME=/opt/module/hadoop-3.2.3
 export PATH=$HADOOP_HOME/bin:$PATH
 export PATH=$HADOOP_HOME/sbin:$PATH
