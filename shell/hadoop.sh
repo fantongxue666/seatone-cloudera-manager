@@ -1,6 +1,21 @@
 #!/usr/bin/bash
-
-echo "检查是否存在JDK环境...";
+#
+# 执行此文件的命令：source hadoop.sh 参数1 参数2 参数3
+# 参数1：服务器IP地址
+# 参数2：登录用户名
+# 参数3：登录密码
+#
+echo "检查是否存在yum工具..."
+yum_result=$(yum --version)
+if [ $? -ne 0 ];then
+	echo "不存在yum工具，开始安装yum..."
+fi
+expect=$(expect -v)
+if [ $? -ne 0 ];then
+	echo "不存在expect工具，开始安装expect..."
+	`yum install -y expect`
+fi
+echo "检查是否存在JDK环境..."
 if [ -z $JAVA_HOME ];then
         echo "不存在JDK环境，删除openssh自带的JDK..."
         for every in `rpm -qa | grep jdk`
@@ -19,6 +34,7 @@ if [ -z $JAVA_HOME ];then
 		echo "jdk安装成功！"
 	else
 		echo "ERROR！jdk安装失败！"
+		exit
 	fi
 	rm -rf /tmp/jdk-8u151-linux-x64.rpm
 else
@@ -48,6 +64,7 @@ if [ -z $HADOOP_HOME ];then
 	sed -i '$aexport YARN_RESOURCEMANAGER_USER=root' /etc/profile
 	sed -i '$aexport YARN_NODEMANAGER_USER=root' /etc/profile
         source /etc/profile
+	sed -i '$aexport JAVA_HOME=$JAVA_HOME' /opt/module/hadoop-3.2.3/etc/hadoop/hadoop-env.sh
         test_result=$(hadoop version)
         if [ $? -eq 0 ];then
         	echo "Hadoop安装成功！"
@@ -56,13 +73,45 @@ if [ -z $HADOOP_HOME ];then
         	echo "ERROR！Hadoop安装失败！"
         	exit
         fi
+fi
+echo "关闭防火墙..."
+`systemctl stop firewalld`
+echo "自动配置hadoop的自定义配置..."
+sed -i '19a<property><name>fs.defaultFS</name><value>hdfs://0.0.0.0:8020</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/core-site.xml
+sed -i '20a<property><name>hadoop.tmp.dir</name><value>/opt/module/hadoop-3.2.3/data</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/core-site.xml
+sed -i '21a<property><name>hadoop.http.staticuser.user</name><value>root</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/core-site.xml
+sed -i '22a<property><name>hadoop.proxyuser.root.hosts</name><value>*</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/core-site.xml
+sed -i '23a<property><name>hadoop.proxyuser.root.groups</name><value>*</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/core-site.xml
+sed -i '19a<property><name>dfs.namenode.http-address</name><value>0.0.0.0:9870</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/hdfs-site.xml
+sed -i '20a<property><name>dfs.namenode.secondary.http-address</name><value>0.0.0.0:9868</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/hdfs-site.xml
+sed -i '15a<property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
+sed -i '16a<property><name>yarn.resourcemanager.hostname</name><value>0.0.0.0</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
+sed -i '19a<property><name>mapreduce.framework.name</name><value>yarn</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/mapred-site.xml
 
-	echo "自动配置hadoop的自定义配置..."
-	echo "开始启动hadoop各项服务..."
-	`systemctl stop firewalld`
-	echo "配置免密登录..."
-	`sh /opt/module/hadoop-3.2.3/sbin/start-all.sh`
+echo "配置免密登录..."
+if [ -z "$(ls ~/.ssh|grep id_rsa.pub)" ];then
+	expect << EOF
+		spawn ssh-keygen -t rsa
+		expect {
+			"id_rsa):" { send "\n";exp_continue }
+			"passphrase):" { send "\n";exp_continue }
+			"again:" { send "\n";exp_continue }
+		}
+EOF
+fi
+if [ -z "$(ls ~/.ssh|grep id_rsa.pub)" ];then
+	echo "ERROR！配置免密登录有问题，没有配置成功！"
+	exit
+else
+	cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
 fi
 
-#echo "自动配置hadoop..."
-#echo "开始启动hadoop各项服务..."
+echo "开始启动hadoop各项服务..."
+`sh /opt/module/hadoop-3.2.3/sbin/start-all.sh`
+echo "hdfs初始化..."
+`hdfs namenode -format`
+echo "======================================================"
+echo "Web 端查看 HDFS 的 NameNode：http://0.0.0.0:9870"
+echo "Web 端查看 YARN 的 ResourceManager：http://0.0.0.0:8088"
+echo "======================================================"
+

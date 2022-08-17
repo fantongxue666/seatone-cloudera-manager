@@ -21,7 +21,9 @@ def handle():
                 ip = input("请输入即将部署服务的服务器IP地址：")
                 result = os.system('ping ' + ip)
                 if(result == 0):
-                    hadoopStruction().struct(param="alone")
+                    userName = input("用户名：")
+                    passWord = input("密码：")
+                    hadoopStruction().struct(param="alone",ip=ip,username=userName,password=passWord)
                 else:
                     print("ERROR! 服务器不可用，请重新输入!")
             except Exception:pass

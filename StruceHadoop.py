@@ -7,12 +7,15 @@ class hadoopStruction:
     '''
     param：alone（单机） cluster（集群）
     '''
-    def struct(self,ip,param,username,password):
+    def struct(self,ip,param,username,password,port=22):
         if(param == "alone"):
             print("开始构建hadoop单机版!")
             # 测试连接执行
-            connection = SSHConnection(host_ip='192.168.195.128', user_name='root', password='aini12345', host_port='22')
-            connection.execute_shell("hadoop.sh")
+            try:
+                connection = SSHConnection(host_ip=ip, user_name=username, password=password, host_port=port)
+                connection.execute_shell("hadoop.sh")
+            except Exception as e:
+                print("ERROR! 无法与目标服务器建立连接！")
         elif(param == "cluster"):
             print("开始构建hadoop集群版!")
         else:
