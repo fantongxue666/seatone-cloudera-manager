@@ -1,4 +1,4 @@
-from utils.SSHConnect import SSHConnection
+from SSHConnect import SSHConnection
 
 '''
 构建Hadoop服务
