@@ -27,14 +27,15 @@ class SSHConnection:
         # err = stderr.readlines()
         while not stdout.channel.exit_status_ready():
             result = stdout.readline()
+            # print(result)
             print(result.replace("\n",""))
             # 由于在退出时，stdout还是会有一次输出，因此需要单独处理，处理完之后，就可以跳出了
             if stdout.channel.exit_status_ready():
                 a = stdout.readlines()
-                print(a.replace("\n",""))
+                # print(a)
+                for i in a:
+                    print(i.replace("\n",""))
                 break
-        # 关闭连接
-        self.ssh.close()
         # return out, err
 
     '''
@@ -68,12 +69,11 @@ class SSHConnection:
         # 删除临时文件
         os.remove(newFilePath)
         # 执行shell脚本
-        out, error = self.execute_command("chmod +x " + linuxPath + ";source " + linuxPath + ";")
-        for o in out:
-            print(o.replace("\n",""))
-
+        self.execute_command("chmod +x " + linuxPath + " && source " + linuxPath + ";")
         # TODO 执行完删除linux上的临时shell 目前执行删除会报错，待解决
         # self.execute_command("sudo rm -rf /tmp/*.sh;")
-        return out,error
+        # return out,error
 
-
+    def close(self):
+        # 关闭连接
+        self.ssh.close()
