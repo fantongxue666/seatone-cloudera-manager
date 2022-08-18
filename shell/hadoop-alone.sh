@@ -1,9 +1,7 @@
 #!/usr/bin/bash
 #
-# 执行此文件的命令：source hadoop-alone.sh 参数1 参数2 参数3
-# 参数1：服务器IP地址
-# 参数2：登录用户名
-# 参数3：登录密码
+# 问题1：JDK环境是否存在的判断有问题
+# 问题2：启动hadoop少一个resourceManager
 #
 echo "检查是否存在yum工具..."
 yum_result=$(yum --version)
