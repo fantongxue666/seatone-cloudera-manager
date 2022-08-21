@@ -23,30 +23,33 @@ class SSHConnection:
     执行sh命令
     '''
 
-    def execute_command(self, command):
+    def execute_command(self, command, logFilePath):
         test = self.host_ip
         stdin, stdout, stderr = self.ssh.exec_command(command, get_pty=True)
-        # out = stdout.readlines()
-        # err = stderr.readlines()
+        # 写入日志文件
+        Note = open(logFilePath, mode='w',encoding='utf-8')
+        # Note.writelines(stdout.readlines())
+        # Note.close()
         while not stdout.channel.exit_status_ready():
             result = stdout.readline()
-            # print(result)
             print(result.replace("\n", ""))
+            Note.write(result.replace("\n", ""))
             # 由于在退出时，stdout还是会有一次输出，因此需要单独处理，处理完之后，就可以跳出了
             if stdout.channel.exit_status_ready():
                 a = stdout.readlines()
-                # print(a)
                 for i in a:
-                    print(i.replace("\n", ""))
+                    result2 = i.replace("\n", "")
+                    print(result2)
+                    Note.write(result2.replace("\n", ""))
                 break
-        # return out, err
+        Note.close()
 
     '''
     执行shell脚本
     参数1：脚本名称 test.sh
     '''
 
-    def execute_shell(self, shellName, *args):
+    def execute_shell(self, shellName, logFilePath, *args):
         # 当前文件的绝对路径
         BASE_DIR = os.path.dirname(__file__)
         shellAbsolutePath = BASE_DIR + "/shell/" + shellName
@@ -55,6 +58,8 @@ class SSHConnection:
             return None
         # 把shell脚本上传至指定目录
         tempDir = BASE_DIR + "/shell/temp/"
+        if not os.path.exists(tempDir):
+            os.mkdir(tempDir)
         tempFileName = str(uuid.uuid4()) + ".sh"
         newFilePath = tempDir + tempFileName
         # 存在就删除，复制shell为新的temp文件，用完再删除
@@ -79,7 +84,7 @@ class SSHConnection:
         while i <= count:
             command = command + " " + args[i - 1]
 
-        self.execute_command(command)
+        self.execute_command(command, logFilePath=logFilePath)
         # TODO 执行完删除linux上的临时shell 目前执行删除会报错，待解决
         # self.execute_command("sudo rm -rf /tmp/*.sh;")
         # return out,error

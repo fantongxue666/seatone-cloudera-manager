@@ -1,3 +1,9 @@
+import time
+import uuid
+
+from flask import jsonify
+
+import MysqlDB
 from SSHConnect import SSHConnection
 import os
 import xlrd
@@ -13,10 +19,30 @@ class hadoopStruction:
     '''
 
     def hadoop_alone(self, ip, username, passwd):
+        # 创建日志文件
+        BASE_DIR = os.path.dirname(__file__)
+        tempDir = BASE_DIR + "/shell/logs/"
+        if not os.path.exists(tempDir):
+            os.mkdir(tempDir)
+        tempFileName = str(uuid.uuid4()) + ".txt"
+        logFilePath = tempDir + tempFileName
+        # 日志文件不存在就创建
+        try:
+            f = open(logFilePath, 'r')
+            f.close()
+        except IOError:
+            f = open(logFilePath, 'w')
+            f.close()
+
         # 上传部署脚本 执行
         connection = SSHConnection(host_ip=ip, user_name=username, password=passwd, host_port=22)
-        connection.execute_shell(shellName="hadoop-alone.sh")
+        connection.execute_shell(shellName="hadoop-alone.sh", logFilePath=logFilePath)
         connection.close()
+
+        # 最后上传日志文件，并存储数据库文件预览地址
+        sql = 'insert into mg_log(id,target_ip,log_url,log_type,log_status,log_time) values ("'+str(uuid.uuid4())+'","123","456","789","test",now())'
+        db = MysqlDB.DataBaseHandle()
+        db.updateDB(sql)
 
     '''
     构建hadoop集群
@@ -29,6 +55,7 @@ class hadoopStruction:
     
     注意点：NameNode、SecondaryNameNode、ResourceManager对资源的需求比较大，应该把他们三个分布到不同的机器上
     '''
+
     def hadoop_cluster(self):
         # 当前文件的绝对路径
         BASE_DIR = os.path.dirname(__file__)
@@ -40,11 +67,11 @@ class hadoopStruction:
         secondaryNameNodeIp = ""
         resourceManagerIp = ""
         for computer in list:
-            if(computer[0] == "NameNode"):
+            if (computer[0] == "NameNode"):
                 nameNodeIp = computer[1]
-            if(computer[0] == "SecondaryNameNode"):
+            if (computer[0] == "SecondaryNameNode"):
                 secondaryNameNodeIp = computer[1]
-            if(computer[0] == "ResourceManager"):
+            if (computer[0] == "ResourceManager"):
                 resourceManagerIp = computer[1]
 
             if computer[1] in ip_list:
@@ -55,30 +82,32 @@ class hadoopStruction:
         for computer in list:
             connection = SSHConnection(host_ip=computer[1], user_name=computer[2], password=computer[3], host_port=22)
             # 参数： 三个主节点的ip 顺序（NameNode,SecondaryNameNode,ResourceManager）
-            connection.execute_shell("hadoop-cluster.sh",nameNodeIp,secondaryNameNodeIp,resourceManagerIp,','.join(ip_list))
+            connection.execute_shell("hadoop-cluster.sh", nameNodeIp, secondaryNameNodeIp, resourceManagerIp,
+                                     ','.join(ip_list))
             connection.close()
-
 
         # 对每台机器进行执行脚本，配置互信功能，免密登录
         # TODO 所有机器的用户名和密码暂时设置成一样的，暂时全部写死为 root bigdata123，后期解决这个问题
         for computer in list:
-            if(computer[0] == "NameNode"):
+            if (computer[0] == "NameNode"):
                 NameNode_userName = computer[2]
                 NameNode_passWord = computer[3]
-            elif(computer[0]=="ResourceManager"):
+            elif (computer[0] == "ResourceManager"):
                 ResourceManager_userName = computer[2]
                 ResourceManager_passWord = computer[3]
 
         # 连接上NameNode节点
-        connection = SSHConnection(host_ip=nameNodeIp, user_name=NameNode_userName, password=NameNode_passWord, host_port=22)
-        connection.execute_shell("hadoop-cluster-ssh-trust.sh",','.join(ip_list))
+        connection = SSHConnection(host_ip=nameNodeIp, user_name=NameNode_userName, password=NameNode_passWord,
+                                   host_port=22)
+        connection.execute_shell("hadoop-cluster-ssh-trust.sh", ','.join(ip_list))
         # 初始化NameNode节点
         connection.execute_command("hdfs namenode -format")
         # 启动HDFS节点
         connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-dfs.sh")
 
         # 连接上ResourceManager节点
-        connection = SSHConnection(host_ip=resourceManagerIp, user_name=ResourceManager_userName, password=ResourceManager_passWord, host_port=22)
+        connection = SSHConnection(host_ip=resourceManagerIp, user_name=ResourceManager_userName,
+                                   password=ResourceManager_passWord, host_port=22)
         # 启动YARN ResourceManager节点
         connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-yarn.sh")
         print("================ Hadoop集群部署成功！ ========================")
@@ -86,13 +115,12 @@ class hadoopStruction:
         print("== Web 端查看 YARN 的 ResourceManager：http://0.0.0.0:8088 ==")
         print("============================================================")
 
-
-
     '''
     读取excel文件
     列表的方式实现 [ [用例编号,用例名称],[],[] ]   外部一个列表元素一个用例  内部列表就是用例详情
     '''
-    def read_excel(self,excel_path):
+
+    def read_excel(self, excel_path):
         workbook = xlrd.open_workbook(excel_path)  # 打开excel工作簿
         sheet = workbook.sheet_by_index(0)  # 选择工作表
         case_infos = []

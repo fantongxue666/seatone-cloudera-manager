@@ -3,8 +3,8 @@
 echo "检测expect工具是否存在..."
 expect=$(expect -v)
 if [ $? -ne 0 ]; then
-  echo "不存在expect工具，开始安装expect..."
-  $(yum install -y expect)
+  	echo "不存在expect工具，开始安装expect..."
+  	$(yum install -y expect)
 fi
 echo "配置集群所有机器的免密登录..."
 
@@ -14,7 +14,7 @@ IFS=,
 arr=($str)
 # 循环N台机器的IP地址，生成密钥文件authorized_keys
 for ip in ${arr[*]}; do
-  expect <<EOF
+	expect <<EOF
      ssh root@$ip
      expect{
       "yes/no" { send "yes\r";exp_continue }
@@ -41,7 +41,7 @@ EOF
 done
 # 循环N台机器的IP地址，scp拷贝key文件到其他机器
 for ip in ${arr[*]}; do
-  expect <<EOF
+	expect <<EOF
     scp -R ~/.ssh/authorized_keys root@$ip:~/.ssh/
         expect{
             "yes/no" { send "yes\r";exp_continue }
@@ -49,5 +49,4 @@ for ip in ${arr[*]}; do
        }
 
 EOF
-
 done
