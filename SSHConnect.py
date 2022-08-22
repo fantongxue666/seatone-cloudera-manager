@@ -24,6 +24,7 @@ class SSHConnection:
     '''
 
     def execute_command(self, command, logFilePath):
+        result = False
         test = self.host_ip
         stdin, stdout, stderr = self.ssh.exec_command(command, get_pty=True)
         # 写入日志文件
@@ -32,8 +33,14 @@ class SSHConnection:
         # Note.close()
         while not stdout.channel.exit_status_ready():
             result = stdout.readline()
-            print(result.replace("\n", ""))
-            Note.write(result.replace("\n", ""))
+            new_result = result.replace("\n", "")
+            print(new_result)
+            Note.write(new_result)
+            if(new_result.strip() == "###Over###"):
+                # 操作成功的标志，记录状态
+                result = True
+
+            ###Over###
             # 由于在退出时，stdout还是会有一次输出，因此需要单独处理，处理完之后，就可以跳出了
             if stdout.channel.exit_status_ready():
                 a = stdout.readlines()
@@ -43,6 +50,7 @@ class SSHConnection:
                     Note.write(result2.replace("\n", ""))
                 break
         Note.close()
+        return result
 
     '''
     执行shell脚本
@@ -84,10 +92,11 @@ class SSHConnection:
         while i <= count:
             command = command + " " + args[i - 1]
 
-        self.execute_command(command, logFilePath=logFilePath)
+        result = self.execute_command(command, logFilePath=logFilePath)
         # TODO 执行完删除linux上的临时shell 目前执行删除会报错，待解决
         # self.execute_command("sudo rm -rf /tmp/*.sh;")
         # return out,error
+        return result
 
     def close(self):
         # 关闭连接

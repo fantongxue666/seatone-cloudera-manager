@@ -36,13 +36,18 @@ class hadoopStruction:
 
         # 上传部署脚本 执行
         connection = SSHConnection(host_ip=ip, user_name=username, password=passwd, host_port=22)
-        connection.execute_shell(shellName="hadoop-alone.sh", logFilePath=logFilePath)
+        result = connection.execute_shell(shellName="hadoop-alone.sh", logFilePath=logFilePath)
         connection.close()
+        if(result == True):
+            resultStr = 'SUCCESS'
+        else:
+            resultStr = 'ERROR'
 
         # 最后上传日志文件，并存储数据库文件预览地址
-        sql = 'insert into mg_log(id,target_ip,log_url,log_type,log_status,log_time) values ("'+str(uuid.uuid4())+'","123","456","789","test",now())'
+        sql = 'insert into mg_log(id,target_ip,log_url,log_type,log_status,log_time) values ("'+str(uuid.uuid4())+'","'+ip+'","'+tempFileName+'","构建Hadoop单机版","'+resultStr+'",now())'
         db = MysqlDB.DataBaseHandle()
-        db.updateDB(sql)
+        i = db.updateDB(sql)
+
 
     '''
     构建hadoop集群

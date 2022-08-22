@@ -243,7 +243,7 @@
                         <input type="text" class="form-control" id="userName" placeholder="请输入用户名">
                     </div>
                     <div style="margin-top: 10px;margin-left: 15%;margin-right: 15%;">
-                        <input type="text" class="form-control" id="passWord" placeholder="请输入密码">
+                        <input type="password" class="form-control" id="passWord" placeholder="请输入密码">
                     </div>
 
 
@@ -263,22 +263,7 @@
                         <th>执行时间</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr class="success">
-                        <td>127.0.0.1</td>
-                        <td>test.txt</td>
-                        <td>构建hadoop单机版</td>
-                        <td style="font-weight: bold;">SUCCESS</td>
-                        <td>2022-01-09 12:02:39</td>
-                    </tr>
-                    <tr class="danger">
-                        <td>127.0.0.1</td>
-                        <td>test.txt</td>
-                        <td>构建hadoop单机版</td>
-                        <td style="font-weight: bold;">ERROR</td>
-                        <td>2022-01-09 12:02:39</td>
-                    </tr>
-
+                    <tbody id="content">
                     </tbody>
                 </table>
 
@@ -287,6 +272,39 @@
         </div><!-- /.main-content -->
     <script src="../static/assets/js/jquery-1.10.2.min.js"></script>
     <script>
+        function getData(){
+            $.get(
+                "/logList",
+                function (data2) {
+                    var data = JSON.parse(data2)
+                    tempStr = '';
+                    for(var i=0;i<data.length;i++){
+                        var status = data[i].log_status
+                        if(status == "SUCCESS"){
+                            tempStr+=' <tr class="success">\n' +
+                                '                        <td>'+data[i].target_ip+'</td>\n' +
+                                '                        <td><a target="_blank" href="/download?fileName='+data[i].log_url+'">'+data[i].log_url+'</a></td>\n' +
+                                '                        <td>'+data[i].log_type+'</td>\n' +
+                                '                        <td style="font-weight: bold;">'+data[i].log_status+'</td>\n' +
+                                '                        <td>'+data[i].log_time+'</td>\n' +
+                                '                    </tr>';
+                        }else{
+                            tempStr+=' <tr class="danger">\n' +
+                                '                        <td>'+data[i].target_ip+'</td>\n' +
+                                '                        <td><a target="_blank" href="/download?fileName='+data[i].log_url+'">'+data[i].log_url+'</a></td>\n' +
+                                '                        <td>'+data[i].log_type+'</td>\n' +
+                                '                        <td style="font-weight: bold;">'+data[i].log_status+'</td>\n' +
+                                '                        <td>'+data[i].log_time+'</td>\n' +
+                                '                    </tr>';
+                        }
+                        $("#content").html(tempStr)
+                    }
+                }
+            );
+        }
+        $(function (){
+            getData()
+        });
         $("#commit").click(function () {
             var ipValue = $("#ip").val()
             var userNameValue = $("#userName").val()
@@ -303,11 +321,13 @@
                     "/hadoop_alone",
                     {ip:ipValue,userName:userNameValue,passWord:passWordValue},
                     function (data) {
+                        var obj = JSON.parse(data)
                         // alert(JSON.stringify(data))
-                        if(data.code==200){
+                        if(obj.code==200){
                             alert("处理完毕！部署详情查看下方日志！")
+                            getData()
                         }else{
-                            alert("发生错误：",data.msg)
+                            alert("ERROR! 发生错误!")
                         }
                         $("#commit").html("立即部署")
                         $("#commit").removeClass("btn-warning")
