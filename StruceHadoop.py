@@ -19,6 +19,7 @@ class hadoopStruction:
     '''
 
     def hadoop_alone(self, ip, username, passwd):
+
         # 创建日志文件
         BASE_DIR = os.path.dirname(__file__)
         tempDir = BASE_DIR + "/shell/logs/"

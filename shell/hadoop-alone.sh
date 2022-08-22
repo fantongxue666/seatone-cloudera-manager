@@ -94,8 +94,8 @@ if [ $? -ne 0 ]; then
 	sed -i '19a<property><name>dfs.namenode.http-address</name><value>0.0.0.0:9870</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/hdfs-site.xml
 	sed -i '20a<property><name>dfs.namenode.secondary.http-address</name><value>0.0.0.0:9868</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/hdfs-site.xml
 	sed -i '15a<property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
-	sed -i '16a<property><name>yarn.resourcemanager.hostname</name><value>localhost</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
-	sed -i '17a<property><name>yarn.resourcemanager.webapp.address</name><value>localhost:8088</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
+	sed -i '16a<property><name>yarn.resourcemanager.hostname</name><value>192.168.195.128</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
+	sed -i '17a<property><name>yarn.resourcemanager.webapp.address</name><value>192.168.195.128:8088</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/yarn-site.xml
 	sed -i '19a<property><name>mapreduce.framework.name</name><value>yarn</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/mapred-site.xml
 
 	echo "配置免密登录..."

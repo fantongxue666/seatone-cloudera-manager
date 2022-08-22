@@ -47,6 +47,9 @@ class SSHConnection:
                 for i in a:
                     result2 = i.replace("\n", "")
                     print(result2)
+                    if(result2.strip() == "###Over###"):
+                        # 操作成功的标志，记录状态
+                        result = True
                     Note.write(result2.replace("\n", ""))
                 break
         Note.close()
