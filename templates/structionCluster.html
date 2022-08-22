@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>单机Hadoop构建</title>
+    <title>集群Hadoop构建</title>
 
     <meta name="keywords" content="Bootstrap模版,Bootstrap模版下载,Bootstrap教程,Bootstrap中文"/>
     <meta name="description" content="站长素材提供Bootstrap模版,Bootstrap教程,Bootstrap中文翻译等相关Bootstrap插件下载"/>
@@ -172,13 +172,13 @@
                         <b class="arrow icon-angle-down"></b>
                     </a>
                     <ul class="submenu" style="display: block;">
-                        <li class="active">
+                        <li>
                             <a href="/struction">
                                 <img style="width: 35px;height: 35px;" src="../static/assets/avatars/hadoop.png" alt="">
                                 Hadoop单机版
                             </a>
                         </li>
-                        <li>
+                        <li class="active">
                             <a href="/structionCluster">
                                 <img style="width: 35px;height: 35px;" src="../static/assets/avatars/hadoop.png" alt="">
                                 Hadoop集群版
@@ -221,7 +221,7 @@
                         <i class="icon-home home-icon"></i>
                         <a href="#">一键部署</a>
                     </li>
-                    <li class="active">Hadoop单机版</li>
+                    <li class="active">Hadoop集群</li>
                 </ul><!-- .breadcrumb -->
 
                 <div class="nav-search" id="nav-search">
@@ -236,15 +236,86 @@
             </div>
 
             <div class="page-content">
-                    <div  style="margin-top: 10px;margin-left: 15%;margin-right: 15%;">
-                        <input type="text" class="form-control" id="ip" placeholder="目标服务器IP">
+                <ul class="nav nav-tabs" style="height: 50px;width: 71%;margin: 0 auto;">
+                    <li class="active" ><a href="#tab1" data-toggle="tab">表单模式</a></li>
+                    <li><a href="#tab2" data-toggle="tab">导入模式</a></li>
+                    <li>
+                        <a href="#">XXX</a></li>
+                    <li>
+                        <a href="#">YYY</a></li>
+                    <li>
+                        <a href="#">ZZZ</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">KKK
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#">QQQ</a></li>
+                            <li>
+                                <a href="#">WWW</a></li>
+                            <li>
+                                <a href="#">EEE</a></li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">RRR</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">TTT</a></li>
+                </ul>
+                <div class="tab-content" style="width: 71%;margin: 0 auto;">
+                    <div id="tab1" class="tab-pane fade in active" style="position: relative;">
+                        <button id="addNode" style="right: 20px;position: absolute;" class="btn-sm btn btn-primary">增加节点</button>
+                        <!-- 表单模式 -->
+                        <h3 style="width: 87%;color: red;font-size: 14px;">集群模式推荐至少三个节点！NameNode、SecondaryNameNode、ResourceManager对资源的需求比较大，应该把他们三个分布到不同的机器上！</h3>
+                        <form id="form">
+                            <div style="margin-top: 1%;">
+                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type1" style="width: 31%;height: 34px;" class="form-control type">
+                                    <option selected disabled>请选择节点类型</option>
+                                    <option value="NameNode">NameNode</option>
+                                    <option value="DataNode">DataNode</option>
+                                    <option value="SecondaryNameNode">SecondaryNameNode</option>
+                                    <option value="ResourceManager">ResourceManager</option>
+                                    <option value="NodeManager">NodeManager</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: 1%;">
+                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type2" style="width: 31%;height: 34px;" class="form-control type">
+                                    <option selected disabled>请选择节点类型</option>
+                                    <option value="NameNode">NameNode</option>
+                                    <option value="DataNode">DataNode</option>
+                                    <option value="SecondaryNameNode">SecondaryNameNode</option>
+                                    <option value="ResourceManager">ResourceManager</option>
+                                    <option value="NodeManager">NodeManager</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: 1%;">
+                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type3" style="width: 31%;height: 34px;" class="form-control type">
+                                    <option selected disabled>请选择节点类型</option>
+                                    <option value="NameNode">NameNode</option>
+                                    <option value="DataNode">DataNode</option>
+                                    <option value="SecondaryNameNode">SecondaryNameNode</option>
+                                    <option value="ResourceManager">ResourceManager</option>
+                                    <option value="NodeManager">NodeManager</option>
+                                </select>
+                            </div>
+                        </form>
+
                     </div>
-                    <div style="margin-top: 10px;margin-left: 15%;margin-right: 15%;">
-                        <input type="text" class="form-control" id="userName" placeholder="请输入用户名">
+                    <div id="tab2" class="tab-pane fade">
+                        <!-- 导入模式 -->
+                        <form class="form-inline" role="form">
+                            <div class="form-group">
+                                <label class="sr-only" for="inputfile">文件输入</label>
+                                <input type="file" id="inputfile">
+                            </div>
+                            <button onclick="downLoadExcel()" class="btn btn-info btn-sm">下载导入模板</button>
+                        </form>
                     </div>
-                    <div style="margin-top: 10px;margin-left: 15%;margin-right: 15%;">
-                        <input type="password" class="form-control" id="passWord" placeholder="请输入密码">
-                    </div>
+                </div>
 
 
                     <div class="form-group" style="margin-top: 10px;margin-left: 39%;margin-right: 39%;">
@@ -272,6 +343,28 @@
         </div><!-- /.main-content -->
     <script src="../static/assets/js/jquery-1.10.2.min.js"></script>
     <script>
+        function downLoadExcel(){
+            window.location.href="http://localhost:8080/downloadExcel";
+        }
+
+        $('#tab1').on('click','#del',function(){
+            $(this).parent().remove();
+        });
+
+        $("#addNode").click(function (){
+            $("#form").append('<div style="margin-top: 1%;">\n' +
+                '                           <input style="width: 31%;float: left;" type="text" class="form-control ip" id="ip" placeholder="请输入服务器IP">\n' +
+                '                           <select id="type" style="width: 31%;height: 34px;" class="form-control type">\n' +
+                '                               <option selected disabled>请选择节点类型</option>\n' +
+                '                               <option>NameNode</option>\n' +
+                '                               <option>DataNode</option>\n' +
+                '                               <option>SecondaryNameNode</option>\n' +
+                '                               <option>ResourceManager</option>\n' +
+                '                               <option>NodeManager</option>\n' +
+                '                           </select>\n' +
+                '                            <button id="del" class="btn-small">删除</button>\n' +
+                '                       </div>');
+        });
         function getData(){
             $.get(
                 "/logList",
@@ -306,29 +399,39 @@
             getData()
         });
         $("#commit").click(function () {
-            var ipValue = $("#ip").val()
-            var userNameValue = $("#userName").val()
-            var passWordValue = $("#passWord").val()
-            if(ipValue==""||userNameValue==""||passWordValue==""){
-                alert("信息必须填写完整！")
-            }else{
-
+            var isSubmit = true;
+            var ipArray = new Array()
+            var typeArray = new Array()
+            $(".ip").each(function(){
+               var currentVal = $(this).val()
+                if(currentVal==""){
+                    isSubmit = false;
+                    return false;
+                }
+                ipArray.push(currentVal)
+            });
+            $(".type").each(function(){
+                var currentVal = $(this).val()
+                if(currentVal==null){
+                    isSubmit = false;
+                    return false;
+                }
+                typeArray.push(currentVal)
+            });
+            if(isSubmit){
                 $("#commit").html("部署中..")
                 $("#commit").removeClass("btn-danger")
                 $("#commit").addClass("btn-warning")
 
                 $.post(
-                    "/hadoop_alone",
-                    {ip:ipValue,userName:userNameValue,passWord:passWordValue},
+                    "/hadoop_cluster_form?ipArray="+ipArray+"&typeArray="+typeArray,
                     function (data) {
                         var obj = JSON.parse(data)
                         // alert(JSON.stringify(data))
                         if(obj.code==200){
                             alert("处理完毕！部署详情查看下方日志！")
                             getData()
-                            $("#ip").val("")
-                            $("#userName").val("")
-                            $("#passWord").val("")
+
                         }else{
                             alert("ERROR! 发生错误!")
                         }
@@ -337,6 +440,8 @@
                         $("#commit").addClass("btn-danger")
                     }
                 );
+            }else{
+                alert("信息必须填写完整！")
             }
         });
     </script>

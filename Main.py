@@ -1,5 +1,6 @@
 import datetime
 import os
+from quopri import quote
 
 from MysqlDB import DataBaseHandle
 from StruceHadoop import hadoopStruction
@@ -24,6 +25,7 @@ class MyEncoder(json.JSONEncoder):
         else:
             return super(MyEncoder, self).default(obj)
 
+# ################################################ 以下是接口 ###############################################
 '''
 构建hadoop单机版
 '''
@@ -40,11 +42,23 @@ def hadoop_alone():
         return json.dumps({"code":500,"msg":"error"})
 
 '''
-构建hadoop集群
+构建hadoop集群（表单模式）
 '''
-@app.route('/hadoop_cluster', methods=["GET", "POST"])
-def hadoop_cluster():
-    hadoopStruction().hadoop_cluster()
+@app.route('/hadoop_cluster_form', methods=["GET", "POST"])
+def hadoop_cluster_form():
+    ipArray = request.args.get("ipArray")
+    typeArray = request.args.get("typeArray")
+    ipList = ipArray.split(",")
+    typeList = typeArray.split(",")
+
+    return json.dumps({"code":200,"msg":"success"})
+
+'''
+构建hadoop集群（导入模式）
+'''
+@app.route('/hadoop_cluster_import', methods=["GET", "POST"])
+def hadoop_cluster_import():
+    hadoopStruction().hadoop_cluster_import()
 
 '''
 查看日志列表
@@ -76,9 +90,24 @@ def download_file():
         return "文件不存在，八成被删除了！"
     response = make_response(send_from_directory(file_path,fileName,as_attachment=False))
     response.headers['Content-Type'] = 'text/html'
-    response.headers["Content-Disposition"] = "inline; filename=" + fileName
+    response.headers["Content-Disposition"] = "inline;filename=" + fileName
     return response
 
+'''
+下载Excel导入模板
+'''
+@app.route("/downloadExcel", methods=['GET'])
+def downloadExcel():
+    BASE_DIR = os.path.dirname(__file__)
+    file_path = BASE_DIR + "/shell/"
+    response = make_response(send_from_directory(file_path,"hadoop-cluster.xls",as_attachment=False))
+    response.headers['Content-Type'] = 'text/html'
+    response.headers["Content-Disposition"] = "attachment;filename=hadoop-cluster.xls".encode('latin-1')
+    return response
+
+
+
+# ################################################ 以下是页面 ###############################################
 '''
 首页页面
 '''
@@ -93,6 +122,13 @@ def index():
 @app.route('/struction')
 def struction():
     return render_template('struction.html')
+
+'''
+构建hadoop集群页面
+'''
+@app.route('/structionCluster')
+def structionCluster():
+    return render_template('structionCluster.html')
 
 
 if __name__ == '__main__':

@@ -51,7 +51,7 @@ class hadoopStruction:
 
 
     '''
-    构建hadoop集群
+    构建hadoop集群（导入模式）
     
     HDFS NameNode：文件系统存储元数据的节点 1个独立节点
     HDFS SecondaryNameNode：NameNode的影子节点 小规模集群可以和NameNode共享节点，大规模集群使用独立节点
@@ -62,7 +62,7 @@ class hadoopStruction:
     注意点：NameNode、SecondaryNameNode、ResourceManager对资源的需求比较大，应该把他们三个分布到不同的机器上
     '''
 
-    def hadoop_cluster(self):
+    def hadoop_cluster_import(self):
         # 当前文件的绝对路径
         BASE_DIR = os.path.dirname(__file__)
         # 读取cluster.xls
@@ -88,8 +88,7 @@ class hadoopStruction:
         for computer in list:
             connection = SSHConnection(host_ip=computer[1], user_name=computer[2], password=computer[3], host_port=22)
             # 参数： 三个主节点的ip 顺序（NameNode,SecondaryNameNode,ResourceManager）
-            connection.execute_shell("hadoop-cluster.sh", nameNodeIp, secondaryNameNodeIp, resourceManagerIp,
-                                     ','.join(ip_list))
+            connection.execute_shell("hadoop-cluster.sh", nameNodeIp, secondaryNameNodeIp, resourceManagerIp,','.join(ip_list))
             connection.close()
 
         # 对每台机器进行执行脚本，配置互信功能，免密登录
@@ -112,8 +111,7 @@ class hadoopStruction:
         connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-dfs.sh")
 
         # 连接上ResourceManager节点
-        connection = SSHConnection(host_ip=resourceManagerIp, user_name=ResourceManager_userName,
-                                   password=ResourceManager_passWord, host_port=22)
+        connection = SSHConnection(host_ip=resourceManagerIp, user_name=ResourceManager_userName,password=ResourceManager_passWord, host_port=22)
         # 启动YARN ResourceManager节点
         connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-yarn.sh")
         print("================ Hadoop集群部署成功！ ========================")
