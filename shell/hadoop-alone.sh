@@ -113,7 +113,12 @@ EOF
 	echo "hdfs初始化..."
 	result=$(hdfs namenode -format)
 	echo "开始启动hadoop各项服务..."
-	source /etc/profile && source ~/.bash_profile && /opt/module/hadoop-3.2.3/sbin/start-all.sh
+	sed -i '1asource /opt/module/hadoop-3.2.3/libexec/hadoop-functions.sh' /opt/module/hadoop-3.2.3/sbin/start-all.sh
+	sed -i '1asource /etc/profile' /opt/module/hadoop-3.2.3/sbin/start-all.sh
+	sed -i '1asource /opt/module/hadoop-3.2.3/libexec/hadoop-functions.sh' /opt/module/hadoop-3.2.3/bin/yarn
+	sed -i '1asource /etc/profile' /opt/module/hadoop-3.2.3/bin/yarn
+	/opt/module/hadoop-3.2.3/sbin/start-all.sh
+	/opt/module/hadoop-3.2.3/bin/yarn --config /opt/module/hadoop-3.2.3/etc/hadoop --daemon start resourcemanager
 	cat <<EOF
       +---------------------------------------------------------------+
       |    Web 端查看 HDFS 的 NameNode：http://0.0.0.0:9870            |
