@@ -17,7 +17,6 @@ class hadoopStruction:
     '''
     构建hadoop单机版
     '''
-
     def hadoop_alone(self, ip, username, passwd):
 
         # 创建日志文件
@@ -49,17 +48,91 @@ class hadoopStruction:
         db = MysqlDB.DataBaseHandle()
         i = db.updateDB(sql)
 
-
     '''
-    构建hadoop集群（导入模式）
+    构建hadoop集群（表单模式）
     
     HDFS NameNode：文件系统存储元数据的节点 1个独立节点
     HDFS SecondaryNameNode：NameNode的影子节点 小规模集群可以和NameNode共享节点，大规模集群使用独立节点
     HDFS DataNode：HDFS数据存储 N个节点
     YARN ResourceManager：资源调度器 1个独立节点
     YARN NodeManager：是每一台机器框架的代理，是执行应用程序的容器，监控应用程序的资源使用情况并且向调度器ResourceManager汇报 N个节点（每台机器上都得有）
-    
     注意点：NameNode、SecondaryNameNode、ResourceManager对资源的需求比较大，应该把他们三个分布到不同的机器上
+    '''
+    def hadoop_cluster_form(self,idList,typeList,userNameList,passWordList):
+        # 创建日志文件
+        BASE_DIR = os.path.dirname(__file__)
+        tempDir = BASE_DIR + "/shell/logs/"
+        if not os.path.exists(tempDir):
+            os.mkdir(tempDir)
+        tempFileName = str(uuid.uuid4()) + ".txt"
+        logFilePath = tempDir + tempFileName
+        # 日志文件不存在就创建
+        try:
+            f = open(logFilePath, 'r')
+            f.close()
+        except IOError:
+            f = open(logFilePath, 'w')
+            f.close()
+
+        try:
+            index = 0
+            while(index < len(idList)):
+                if(typeList[index] == "NameNode"):
+                    nameNodeIp = idList[index]
+                    nameNodeUserName = userNameList[index]
+                    nameNodePassWord = passWordList[index]
+                elif(typeList[index] == "SecondaryNameNode"):
+                    secondaryNameNodeIp = idList[index]
+                    secondaryNameNodeUserName =  userNameList[index]
+                    secondaryNameNodePassWord =  passWordList[index]
+                elif(typeList[index] == "ResourceManager"):
+                    resourceManagerIp = idList[index]
+                    resourceManagerUserName = userNameList[index]
+                    resourceManagerPassWord = passWordList[index]
+                index = index + 1
+
+            index = 0
+            # 对每台机器进行执行脚本，搭建hadoop的基础环境
+            resultList = []
+            while(index < len(idList)):
+                connection = SSHConnection(host_ip=idList[index], user_name=userNameList[index], password=passWordList[index], host_port=22)
+                result = connection.execute_shell("hadoop-cluster.sh", logFilePath,nameNodeIp, secondaryNameNodeIp, resourceManagerIp,
+                                         ','.join(idList),
+                                         ','.join(typeList),
+                                         ','.join(userNameList),
+                                         ','.join(passWordList))
+                connection.close()
+                index = index + 1
+                resultList.append(result)
+
+            # 连接上NameNode节点 初始化NameNode节点 启动HDFS节点
+            connection = SSHConnection(host_ip=nameNodeIp, user_name=nameNodeUserName, password=nameNodePassWord,host_port=22)
+            connection.execute_command("hdfs namenode -format",logFilePath)
+            connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-dfs.sh",logFilePath)
+
+            # 连接上ResourceManager节点 启动YARN ResourceManager节点
+            connection = SSHConnection(host_ip=resourceManagerIp, user_name=resourceManagerUserName,password=resourceManagerPassWord, host_port=22)
+            connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-yarn.sh",logFilePath)
+            print("================ Hadoop集群部署成功！ ========================")
+            print("== Web 端查看 HDFS 的 NameNode：http://"+nameNodeIp+":9870        ==")
+            print("== Web 端查看 YARN 的 ResourceManager：http://"+resourceManagerIp+":8088 ==")
+            print("============================================================")
+            if False in resultList:
+                # 执行失败
+                resultStr = 'ERROR'
+            else:
+                # 执行成功
+                resultStr = 'SUCCESS'
+            # 最后上传日志文件，并存储数据库文件预览地址
+            sql = 'insert into mg_log(id,target_ip,log_url,log_type,log_status,log_time) values ("'+str(uuid.uuid4())+'","'+','.join(idList)+'","'+tempFileName+'","构建Hadoop集群","'+resultStr+'",now())'
+            db = MysqlDB.DataBaseHandle()
+            i = db.updateDB(sql)
+            return True
+        except Exception:
+            return False
+
+    '''
+    构建hadoop集群（导入模式）
     '''
 
     def hadoop_cluster_import(self):
@@ -67,57 +140,8 @@ class hadoopStruction:
         BASE_DIR = os.path.dirname(__file__)
         # 读取cluster.xls
         list = self.read_excel(BASE_DIR + "/shell/hadoop-cluster.xls")
-        # IP列表
-        ip_list = []
-        nameNodeIp = ""
-        secondaryNameNodeIp = ""
-        resourceManagerIp = ""
-        for computer in list:
-            if (computer[0] == "NameNode"):
-                nameNodeIp = computer[1]
-            if (computer[0] == "SecondaryNameNode"):
-                secondaryNameNodeIp = computer[1]
-            if (computer[0] == "ResourceManager"):
-                resourceManagerIp = computer[1]
 
-            if computer[1] in ip_list:
-                pass
-            else:
-                ip_list.append(computer[1])
-        # 对每台机器进行执行脚本，搭建hadoop的基础环境
-        for computer in list:
-            connection = SSHConnection(host_ip=computer[1], user_name=computer[2], password=computer[3], host_port=22)
-            # 参数： 三个主节点的ip 顺序（NameNode,SecondaryNameNode,ResourceManager）
-            connection.execute_shell("hadoop-cluster.sh", nameNodeIp, secondaryNameNodeIp, resourceManagerIp,','.join(ip_list))
-            connection.close()
 
-        # 对每台机器进行执行脚本，配置互信功能，免密登录
-        # TODO 所有机器的用户名和密码暂时设置成一样的，暂时全部写死为 root bigdata123，后期解决这个问题
-        for computer in list:
-            if (computer[0] == "NameNode"):
-                NameNode_userName = computer[2]
-                NameNode_passWord = computer[3]
-            elif (computer[0] == "ResourceManager"):
-                ResourceManager_userName = computer[2]
-                ResourceManager_passWord = computer[3]
-
-        # 连接上NameNode节点
-        connection = SSHConnection(host_ip=nameNodeIp, user_name=NameNode_userName, password=NameNode_passWord,
-                                   host_port=22)
-        connection.execute_shell("hadoop-cluster-ssh-trust.sh", ','.join(ip_list))
-        # 初始化NameNode节点
-        connection.execute_command("hdfs namenode -format")
-        # 启动HDFS节点
-        connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-dfs.sh")
-
-        # 连接上ResourceManager节点
-        connection = SSHConnection(host_ip=resourceManagerIp, user_name=ResourceManager_userName,password=ResourceManager_passWord, host_port=22)
-        # 启动YARN ResourceManager节点
-        connection.execute_command("source /etc/profile && /opt/module/hadoop-3.2.3/sbin/start-yarn.sh")
-        print("================ Hadoop集群部署成功！ ========================")
-        print("== Web 端查看 HDFS 的 NameNode：http://0.0.0.0:9870        ==")
-        print("== Web 端查看 YARN 的 ResourceManager：http://0.0.0.0:8088 ==")
-        print("============================================================")
 
     '''
     读取excel文件

@@ -94,7 +94,7 @@ class SSHConnection:
         i = 1
         while i <= count:
             command = command + " " + args[i - 1]
-
+            i = i + 1
         result = self.execute_command(command, logFilePath=logFilePath)
         # TODO 执行完删除linux上的临时shell 目前执行删除会报错，待解决
         # self.execute_command("sudo rm -rf /tmp/*.sh;")

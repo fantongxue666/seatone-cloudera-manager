@@ -95,14 +95,55 @@ if [ $? -ne 0 ]; then
   	sed -i '19a<property><name>mapreduce.framework.name</name><value>yarn</value></property>' /opt/module/hadoop-3.2.3/etc/hadoop/mapred-site.xml
 
   	str=$4
-  	echo "=========>集群IP列表<========：$str"
   	oldIFS=$IFS
   	IFS=,
-  	arr=($str)
-  	for i in ${arr[*]}; do
+  	ip_arr=($str)
+  	for i in ${ip_arr[*]}; do
 	  	sed -i '1a'"${i}" /opt/module/hadoop-3.2.3/etc/hadoop/workers
   	done
   	sed -i '1d' /opt/module/hadoop-3.2.3/etc/hadoop/workers
+
+
+    echo "配置集群所有机器的免密登录..."
+    if [ -z "$(ls ~/.ssh | grep id_rsa.pub)" ]; then
+    str=$6
+    oldIFS=$IFS
+    IFS=,
+    username_arr=($str)
+
+    str=$7
+    oldIFS=$IFS
+    IFS=,
+    password_arr=($str)
+
+
+    # 先生成自己的密钥
+    if [ -z "$(ls ~/.ssh | grep id_rsa.pub)" ]; then
+		expect <<EOF
+		spawn ssh-keygen -t rsa
+		expect {
+			"id_rsa):" { send "\n";exp_continue }
+			"passphrase):" { send "\n";exp_continue }
+			"again:" { send "\n";exp_continue }
+		}
+EOF
+	  cat ~/.ssh/id_rsa.pub >~/.ssh/authorized_keys
+
+    # 循环N台机器的IP地址，把自己的密钥文件authorized_keys分发给其他机器
+    count=0
+    for ip in ${ip_arr[*]}; do
+      expect <<EOF
+        ssh-copy-id  ${username_arr[$count]}@${ip_arr[$count]}
+         expect{
+          "yes/no" { send "yes\r";exp_continue }
+          "password:"{ send "${password_arr[$count]}\r";exp_continue }
+        }
+
+EOF
+    let count+=1
+    done
+    fi
+    echo "###Over###" # 自定义结束标志
 else
   	echo "Hadoop环境已存在！"
 fi

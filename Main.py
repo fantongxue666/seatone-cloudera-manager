@@ -48,10 +48,17 @@ def hadoop_alone():
 def hadoop_cluster_form():
     ipArray = request.args.get("ipArray")
     typeArray = request.args.get("typeArray")
+    usernameArray = request.args.get("usernameArray")
+    passwordArray = request.args.get("passwordArray")
     ipList = ipArray.split(",")
     typeList = typeArray.split(",")
-
-    return json.dumps({"code":200,"msg":"success"})
+    userNameList = usernameArray.split(",")
+    passWordList = passwordArray.split(",")
+    result = hadoopStruction().hadoop_cluster_form(idList=ipList,typeList=typeList,userNameList=userNameList,passWordList=passWordList)
+    if(result == True):
+        return json.dumps({"code":200,"msg":"success"})
+    else:
+        return json.dumps({"code":500,"msg":"error"})
 
 '''
 构建hadoop集群（导入模式）
@@ -65,8 +72,9 @@ def hadoop_cluster_import():
 '''
 @app.route('/logList', methods=["GET"])
 def getLogList():
+    param = request.args.get("logType")
     db = DataBaseHandle()  # 数据库操作类 全局
-    data = db.selectDB("select * from mg_log where log_type='构建Hadoop单机版' order by log_time desc")
+    data = db.selectDB("select * from mg_log where log_type='"+str(param)+"' order by log_time desc")
     list=[]
     for obj in data:
         list.append({
@@ -89,7 +97,7 @@ def download_file():
     if not os.path.exists(file_path + fileName):
         return "文件不存在，八成被删除了！"
     response = make_response(send_from_directory(file_path,fileName,as_attachment=False))
-    response.headers['Content-Type'] = 'text/html'
+    response.headers['Content-Type'] = 'text/html;charset=utf-8'
     response.headers["Content-Disposition"] = "inline;filename=" + fileName
     return response
 

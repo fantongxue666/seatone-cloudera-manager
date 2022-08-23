@@ -266,7 +266,15 @@
                     <tbody id="content">
                     </tbody>
                 </table>
-
+                <ul style="float: right;margin-right: 15%;margin-top: -5%;" class="pagination">
+                    <li><a href="#">&laquo;</a></li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li><a href="#">&raquo;</a></li>
+                </ul>
                 </div><!-- /.row -->
             </div><!-- /.page-content -->
         </div><!-- /.main-content -->
@@ -275,6 +283,7 @@
         function getData(){
             $.get(
                 "/logList",
+                {"logType":"构建Hadoop单机版"},
                 function (data2) {
                     var data = JSON.parse(data2)
                     tempStr = '';

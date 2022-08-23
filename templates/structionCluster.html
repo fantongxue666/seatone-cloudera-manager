@@ -270,8 +270,8 @@
                         <h3 style="width: 87%;color: red;font-size: 14px;">集群模式推荐至少三个节点！NameNode、SecondaryNameNode、ResourceManager对资源的需求比较大，应该把他们三个分布到不同的机器上！</h3>
                         <form id="form">
                             <div style="margin-top: 1%;">
-                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
-                                <select id="type1" style="width: 31%;height: 34px;" class="form-control type">
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type1" style="width: 20%;height: 34px;display: inline-block;" class="form-control type">
                                     <option selected disabled>请选择节点类型</option>
                                     <option value="NameNode">NameNode</option>
                                     <option value="DataNode">DataNode</option>
@@ -279,10 +279,12 @@
                                     <option value="ResourceManager">ResourceManager</option>
                                     <option value="NodeManager">NodeManager</option>
                                 </select>
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control username" placeholder="用户名">
+                                <input style="width: 20%;display: inline-block;" type="password" class="form-control password" placeholder="登录密码">
                             </div>
                             <div style="margin-top: 1%;">
-                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
-                                <select id="type2" style="width: 31%;height: 34px;" class="form-control type">
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type1" style="width: 20%;height: 34px;display: inline-block;" class="form-control type">
                                     <option selected disabled>请选择节点类型</option>
                                     <option value="NameNode">NameNode</option>
                                     <option value="DataNode">DataNode</option>
@@ -290,10 +292,12 @@
                                     <option value="ResourceManager">ResourceManager</option>
                                     <option value="NodeManager">NodeManager</option>
                                 </select>
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control username" placeholder="用户名">
+                                <input style="width: 20%;display: inline-block;" type="password" class="form-control password" placeholder="登录密码">
                             </div>
                             <div style="margin-top: 1%;">
-                                <input style="width: 31%;float: left;" type="text" class="form-control ip" placeholder="请输入服务器IP">
-                                <select id="type3" style="width: 31%;height: 34px;" class="form-control type">
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control ip" placeholder="请输入服务器IP">
+                                <select id="type1" style="width: 20%;height: 34px;display: inline-block;" class="form-control type">
                                     <option selected disabled>请选择节点类型</option>
                                     <option value="NameNode">NameNode</option>
                                     <option value="DataNode">DataNode</option>
@@ -301,6 +305,8 @@
                                     <option value="ResourceManager">ResourceManager</option>
                                     <option value="NodeManager">NodeManager</option>
                                 </select>
+                                <input style="width: 20%;display: inline-block;" type="text" class="form-control username" placeholder="用户名">
+                                <input style="width: 20%;display: inline-block;" type="password" class="form-control password" placeholder="登录密码">
                             </div>
                         </form>
 
@@ -337,7 +343,15 @@
                     <tbody id="content">
                     </tbody>
                 </table>
-
+                <ul style="float: right;margin-right: 15%;margin-top: -5%;" class="pagination">
+                    <li><a href="#">&laquo;</a></li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li><a href="#">&raquo;</a></li>
+                </ul>
                 </div><!-- /.row -->
             </div><!-- /.page-content -->
         </div><!-- /.main-content -->
@@ -352,22 +366,25 @@
         });
 
         $("#addNode").click(function (){
-            $("#form").append('<div style="margin-top: 1%;">\n' +
-                '                           <input style="width: 31%;float: left;" type="text" class="form-control ip" id="ip" placeholder="请输入服务器IP">\n' +
-                '                           <select id="type" style="width: 31%;height: 34px;" class="form-control type">\n' +
-                '                               <option selected disabled>请选择节点类型</option>\n' +
-                '                               <option>NameNode</option>\n' +
-                '                               <option>DataNode</option>\n' +
-                '                               <option>SecondaryNameNode</option>\n' +
-                '                               <option>ResourceManager</option>\n' +
-                '                               <option>NodeManager</option>\n' +
-                '                           </select>\n' +
-                '                            <button id="del" class="btn-small">删除</button>\n' +
-                '                       </div>');
+            $("#form").append(' <div style="margin-top: 1%;">\n' +
+                '                                <input style="width: 20%;display: inline-block;" type="text" class="form-control ip" placeholder="请输入服务器IP">\n' +
+                '                                <select id="type1" style="width: 20%;height: 34px;display: inline-block;" class="form-control type">\n' +
+                '                                    <option selected disabled>请选择节点类型</option>\n' +
+                '                                    <option value="NameNode">NameNode</option>\n' +
+                '                                    <option value="DataNode">DataNode</option>\n' +
+                '                                    <option value="SecondaryNameNode">SecondaryNameNode</option>\n' +
+                '                                    <option value="ResourceManager">ResourceManager</option>\n' +
+                '                                    <option value="NodeManager">NodeManager</option>\n' +
+                '                                </select>\n' +
+                '                                <input style="width: 20%;display: inline-block;" type="text" class="form-control username" placeholder="用户名">\n' +
+                '                                <input style="width: 20%;display: inline-block;" type="password" class="form-control password" placeholder="登录密码">\n' +
+                '                            <button id="del" class="btn-small" style="display: inline-block;">删除</button>\n' +
+                '                            </div>');
         });
         function getData(){
             $.get(
                 "/logList",
+                {"logType":"构建Hadoop集群"},
                 function (data2) {
                     var data = JSON.parse(data2)
                     tempStr = '';
@@ -402,6 +419,8 @@
             var isSubmit = true;
             var ipArray = new Array()
             var typeArray = new Array()
+            var usernameArray = new Array()
+            var passwordArray = new Array()
             $(".ip").each(function(){
                var currentVal = $(this).val()
                 if(currentVal==""){
@@ -418,20 +437,35 @@
                 }
                 typeArray.push(currentVal)
             });
+            $(".username").each(function(){
+                var currentVal = $(this).val()
+                if(currentVal==""){
+                    isSubmit = false;
+                    return false;
+                }
+                usernameArray.push(currentVal)
+            });
+            $(".password").each(function(){
+                var currentVal = $(this).val()
+                if(currentVal==""){
+                    isSubmit = false;
+                    return false;
+                }
+                passwordArray.push(currentVal)
+            });
             if(isSubmit){
                 $("#commit").html("部署中..")
                 $("#commit").removeClass("btn-danger")
                 $("#commit").addClass("btn-warning")
 
                 $.post(
-                    "/hadoop_cluster_form?ipArray="+ipArray+"&typeArray="+typeArray,
+                    "/hadoop_cluster_form?ipArray="+ipArray+"&typeArray="+typeArray+"&usernameArray="+usernameArray+"&passwordArray="+passwordArray,
                     function (data) {
                         var obj = JSON.parse(data)
                         // alert(JSON.stringify(data))
                         if(obj.code==200){
                             alert("处理完毕！部署详情查看下方日志！")
                             getData()
-
                         }else{
                             alert("ERROR! 发生错误!")
                         }
