@@ -101,8 +101,7 @@ if [ $? -ne 0 ]; then
 		sed -i '1a'"$i" /opt/module/hadoop-3.2.3/etc/hadoop/workers
 	done
 	sed -i '1d' /opt/module/hadoop-3.2.3/etc/hadoop/workers
-
-	echo "配置集群所有机器的免密登录..."
+	echo "配置互信..."
 	str=$6
 	oldIFS=$IFS
 	IFS=,
