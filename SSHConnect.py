@@ -28,7 +28,7 @@ class SSHConnection:
         test = self.host_ip
         stdin, stdout, stderr = self.ssh.exec_command(command, get_pty=True)
         # 写入日志文件
-        Note = open(logFilePath, mode='w',encoding='utf-8')
+        Note = open(logFilePath, mode='a',encoding='utf-8')
         # Note.writelines(stdout.readlines())
         # Note.close()
         while not stdout.channel.exit_status_ready():
