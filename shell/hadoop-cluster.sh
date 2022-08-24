@@ -7,8 +7,7 @@ fi
 echo "检查是否存在JDK环境..."
 if [ -z $(echo $JAVA_HOME) ]; then
 	echo "删除openssh自带的JDK..."
-	for every in $(rpm -qa | grep jdk)
-	do
+	for every in $(rpm -qa | grep jdk); do
 		rpm -e --nodeps $every
 	done
 	echo "下载jdk8..."
@@ -103,22 +102,20 @@ if [ $? -ne 0 ]; then
 	done
 	sed -i '1d' /opt/module/hadoop-3.2.3/etc/hadoop/workers
 
-
 	echo "配置集群所有机器的免密登录..."
-		str=$6
-		oldIFS=$IFS
-		IFS=,
-		username_arr=($str)
+	str=$6
+	oldIFS=$IFS
+	IFS=,
+	username_arr=($str)
 
-		str=$7
-		oldIFS=$IFS
-		IFS=,
-		password_arr=($str)
+	str=$7
+	oldIFS=$IFS
+	IFS=,
+	password_arr=($str)
 
-
-		# 先生成自己的密钥
-		if [ -z "$(ls ~/.ssh | grep id_rsa.pub)" ]; then
-			expect <<EOF
+	# 先生成自己的密钥
+	if [ -z "$(ls ~/.ssh | grep id_rsa.pub)" ]; then
+		expect <<EOF
 				spawn ssh-keygen -t rsa
 				expect {
 					"id_rsa):" { send "\n";exp_continue }
@@ -126,11 +123,11 @@ if [ $? -ne 0 ]; then
 					"again:" { send "\n";exp_continue }
 				}
 EOF
-			cat ~/.ssh/id_rsa.pub >~/.ssh/authorized_keys
-			# 循环N台机器的IP地址，把自己的密钥文件authorized_keys分发给其他机器
-			count=0
-			for ip in ${ip_arr[*]}; do
-				expect <<EOF
+		cat ~/.ssh/id_rsa.pub >~/.ssh/authorized_keys
+		# 循环N台机器的IP地址，把自己的密钥文件authorized_keys分发给其他机器
+		count=0
+		for ip in ${ip_arr[*]}; do
+			expect <<EOF
 						ssh-copy-id  ${username_arr[$count]}@${ip_arr[$count]}
 						expect{
 							"yes/no" { send "yes\r";exp_continue }
@@ -138,8 +135,8 @@ EOF
 						}
 
 EOF
-				let count+=1
-			done
+			let count+=1
+		done
 	fi
 	echo "###Over###" # 自定义结束标志
 else
