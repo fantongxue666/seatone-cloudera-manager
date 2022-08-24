@@ -117,9 +117,9 @@ EOF
 	sed -i '1asource /etc/profile' /opt/module/hadoop-3.2.3/sbin/start-all.sh
 	sed -i '1asource /opt/module/hadoop-3.2.3/libexec/hadoop-functions.sh' /opt/module/hadoop-3.2.3/bin/yarn
 	sed -i '1asource /etc/profile' /opt/module/hadoop-3.2.3/bin/yarn
-	/opt/module/hadoop-3.2.3/sbin/start-all.sh
-	sleep 5
-	/opt/module/hadoop-3.2.3/bin/yarn --config /opt/module/hadoop-3.2.3/etc/hadoop --daemon start resourcemanager
+
+	nohup /opt/module/hadoop-3.2.3/sbin/start-all.sh
+  sleep 10
 	cat <<EOF
       +---------------------------------------------------------------+
       |    Web 端查看 HDFS 的 NameNode：http://0.0.0.0:9870            |
